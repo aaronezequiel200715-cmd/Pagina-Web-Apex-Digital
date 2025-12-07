@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Apex Digital — Catálogo y Servicios</title>
+<style>
+/* ===== VARIABLES ===== */
+:root{
+  --verde-fuerte:#00ff66;
+  --verde-bajo:#00aa66;
+  --bg:#000;
+  --muted:rgba(255,255,255,0.75);
+  --card-bg:rgba(255,255,255,0.02);
+  --card-border:rgba(0,255,102,0.12);
+  --glass:rgba(255,255,255,0.03);
+}
+
+/* ===== RESET ===== */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  background:var(--bg);
+  color:#eafef1;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+
+/* ===== HEADER ===== */
+header{
+  position:fixed;top:0;left:0;right:0;
+  height:72px; display:flex;align-items:center;justify-content:center;
+  z-index:80;padding:10px 18px;background:linear-gradient(180deg, rgba(0,0,0,0.6), rgba(0,0,0,0.45));
+  border-bottom:2px solid var(--verde-fuerte);
+  backdrop-filter:blur(6px);
+}
+header img.logo{position:absolute;left:16px;height:44px}
+nav{display:flex;gap:18px}
+nav a{
+  color:var(--verde-fuerte);text-decoration:none;font-weight:800;padding:8px 12px;border-radius:8px;
+  transition:all .18s ease;border:2px solid transparent;
+}
+nav a:hover{background:var(--verde-fuerte);color:#000;transform:translateY(-3px)}
+
+/* ===== SECTIONS ===== */
+.section{
+  min-height:100vh;padding:120px 20px 70px;max-width:1200px;margin:0 auto;position:relative;z-index:2;
+}
+.separator{height:4px;background:var(--verde-fuerte);width:100%;margin:0 auto}
+
+/* ===== MATRIX CANVAS (solo en secciones marcadas) ===== */
+.canvas-wrap{position:absolute;inset:0;z-index:0;overflow:hidden}
+.canvas-wrap canvas{width:100%;height:100%;display:block;}
+
+/* Ensure content displays above canvas */
+.section .foreground{position:relative;z-index:2}
+
+/* ===== HERO (INICIO) ===== */
+.hero{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;min-height:60vh;
+  text-align:center;
+}
+.hero-title{
+  font-size:120px;font-weight:900;line-height:0.9;
+  background: linear-gradient(90deg,#fff6 0%, #b2ffdd 50%, #eafffb 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  text-shadow:0 12px 28px rgba(0,0,0,0.7);
+  z-index:3; /* always above canvas */
+  display:inline-block;
+  padding:6px 12px;border-radius:12px;
+}
+.hero-sub{color:var(--muted);font-size:18px;margin-top:6px}
+
+/* responsive hero */
+@media(max-width:900px){ .hero-title{font-size:72px} }
+@media(max-width:420px){ .hero-title{font-size:36px} }
+
+/* ===== SOBRE NOSOTROS ===== */
+.sobre-grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+  gap:18px;
+  margin-top:20px;
+}
+.sobre-card{
+  background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;padding:18px;text-align:center;
+  backdrop-filter: blur(6px);
+}
+.sobre-card .icon{font-size:34px;margin-bottom:8px}
+.sobre-card h3{margin:6px 0;font-size:20px}
+.sobre-card p{color:var(--muted);line-height:1.4}
+
+/* ===== SERVICES TABS ===== */
+.tabs{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:6px}
+.tab-btn{
+  background:transparent;border:2px solid rgba(255,255,255,0.04);padding:8px 12px;border-radius:10px;color:var(--muted);
+  cursor:pointer;font-weight:800;transition:all .18s ease;
+}
+.tab-btn.active{background:linear-gradient(90deg,var(--verde-fuerte),var(--verde-bajo));color:#000;transform:translateY(-4px);box-shadow:0 12px 36px rgba(0,255,102,0.06)}
+
+/* ===== GRID CARDS ===== */
+.panels{margin-top:18px}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:16px;
+  margin-top:12px;
+}
+@media(max-width:1100px){ .grid{grid-template-columns:repeat(3,1fr)} }
+@media(max-width:760px){ .grid{grid-template-columns:repeat(2,1fr)} }
+@media(max-width:420px){ .grid{grid-template-columns:repeat(1,1fr)} }
+
+.card{
+  background:var(--card-bg);
+  border:1px solid var(--card-border);
+  border-radius:12px;padding:14px;min-height:170px;display:flex;flex-direction:column;justify-content:space-between;
+  transition:transform .28s cubic-bezier(.2,.9,.2,1),box-shadow .28s;
+  cursor:pointer;backdrop-filter: blur(6px);
+}
+.card:hover{transform:translateY(-10px) rotateX(2deg);box-shadow:0 30px 80px rgba(0,0,0,0.6)}
+.card .emoji-3d{display:flex;align-items:center;justify-content:center;margin:6px auto}
+.card h4{font-size:18px;margin:8px 0}
+.card p.desc{color:var(--muted);font-size:14px;line-height:1.3}
+.card p.price{font-weight:900;color:var(--verde-fuerte);margin-top:10px}
+
+/* subtle floating animation for cards */
+@keyframes floaty { 0%{transform:translateY(0)}50%{transform:translateY(-6px)}100%{transform:translateY(0)}}
+.card.floaty{animation: floaty 6s ease-in-out infinite}
+
+/* ===== EMOJI 3D ===== */
+.emoji-3d{width:56px;height:56px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));box-shadow:0 6px 18px rgba(0,0,0,0.6)}
+.emoji-3d span{font-size:28px;transform:translateZ(12px);text-shadow:0 6px 18px rgba(0,0,0,0.6)}
+
+/* ===== MODAL ===== */
+.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.65);z-index:140;padding:18px}
+.modal.active{display:flex}
+.modal-content{width:100%;max-width:980px;background:#070707;border:2px solid var(--verde-fuerte);border-radius:12px;padding:18px;position:relative;box-shadow:0 28px 80px rgba(0,0,0,0.9)}
+.modal-close{position:absolute;right:16px;top:10px;background:transparent;border:none;color:var(--verde-fuerte);font-size:20px;cursor:pointer}
+.modal-grid{display:grid;grid-template-columns:1fr 320px;gap:16px}
+@media(max-width:920px){ .modal-grid{grid-template-columns:1fr} }
+.specs-list{list-style:disc;margin-left:18px;color:var(--muted)}
+.colors-row{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.color-swatch{width:36px;height:36px;border-radius:8px;border:2px solid rgba(255,255,255,0.05);cursor:pointer}
+.color-swatch.selected{outline:3px solid rgba(0,255,102,0.18);transform:translateY(-4px)}
+
+/* ===== CONTACTO (más grande y visible) ===== */
+.contact-box{
+  position:relative;z-index:2;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  padding:36px;border-radius:14px;border:1px solid rgba(255,255,255,0.03);display:inline-block;
+  backdrop-filter: blur(8px);
+}
+.contact-box h2{font-size:44px;color:var(--verde-fuerte);margin-bottom:8px}
+.contact-box p{font-size:20px;color:var(--muted);margin:6px 0}
+
+/* small text */
+.lead{color:var(--muted);max-width:760px;margin:8px auto;font-size:15px}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <img src="lodo apex digital.png" alt="Logo" class="logo">
+  <nav aria-label="principal">
+    <a onclick="scrollToSection('inicio')">Inicio</a>
+    <a onclick="scrollToSection('nosotros')">Sobre Nosotros</a>
+    <a onclick="scrollToSection('servicios')">Servicios</a>
+    <a onclick="scrollToSection('contacto')">Contacto</a>
+  </nav>
+</header>
+
+<!-- INICIO (con matrix) -->
+<section id="inicio" class="section">
+  <!-- only here: canvas -->
+  <div class="canvas-wrap" aria-hidden="true"><canvas id="matrixInicio"></canvas></div>
+
+  <div class="foreground hero">
+    <h1 class="hero-title" id="heroTitle">BIENVENIDOS</h1>
+    <p class="hero-sub">Desarrollo web, venta de equipos y servicios técnicos profesionales.</p>
+  </div>
+</section>
+<div class="separator" aria-hidden="true"></div>
+
+<!-- SOBRE NOSOTROS (REINTEGRADA) -->
+<section id="nosotros" class="section" aria-labelledby="titulo-nosotros">
+  <div class="foreground">
+    <h2 id="titulo-nosotros" style="color:var(--verde-fuerte);margin-bottom:8px">Sobre Nosotros</h2>
+    <p class="lead">Somos un estudio que combina diseño, tecnología y servicio cercano. Ayudamos a negocios y creadores a tener presencia profesional en línea y equipar espacios de trabajo con tecnología de calidad.</p>
+
+    <div class="sobre-grid" role="list">
+      <div class="sobre-card" role="listitem">
+        <div class="icon">📜</div>
+        <h3>Nuestra Historia</h3>
+        <p>Empezamos como un pequeño estudio local y crecimos ayudando a clientes a digitalizar sus negocios con soluciones efectivas.</p>
+      </div>
+
+      <div class="sobre-card" role="listitem">
+        <div class="icon">🎯</div>
+        <h3>Misión</h3>
+        <p>Crear páginas y soluciones tecnológicas que conviertan visitantes en clientes, con foco en resultados y experiencia de usuario.</p>
+      </div>
+
+      <div class="sobre-card" role="listitem">
+        <div class="icon">🚀</div>
+        <h3>Visión</h3>
+        <p>Ser un referente regional en servicios digitales y venta/ensamblado de equipos confiables y accesibles.</p>
+      </div>
+
+      <div class="sobre-card" role="listitem">
+        <div class="icon">💚</div>
+        <h3>Valores</h3>
+        <p>Transparencia, calidad y compromiso. Apoyamos a cada cliente con comunicación clara y trabajo responsable.</p>
+      </div>
+    </div>
+  </div>
+</section>
+<div class="separator" aria-hidden="true"></div>
+
+<!-- SERVICIOS -->
+<section id="servicios" class="section">
+  <h2 style="color:var(--verde-fuerte);margin-bottom:6px">Servicios & Catálogo</h2>
+  <p class="lead">Explora nuestras categorías. Haz clic en cualquier tarjeta para ver especificaciones y precio.</p>
+
+  <!-- tabs -->
+  <div class="tabs" role="tablist" aria-label="categorías">
+    <button class="tab-btn active" data-tab="accesorios" role="tab" aria-selected="true">Accesorios</button>
+    <button class="tab-btn" data-tab="piezas" role="tab" aria-selected="false">Piezas</button>
+    <button class="tab-btn" data-tab="computadoras" role="tab" aria-selected="false">Computadoras</button>
+    <button class="tab-btn" data-tab="servicios-digitales" role="tab" aria-selected="false">Servicios Digitales</button>
+    <button class="tab-btn" data-tab="servicios-web" role="tab" aria-selected="false">Servicios Web</button>
+    <button class="tab-btn" data-tab="extras" role="tab" aria-selected="false">Extras</button>
+  </div>
+
+  <!-- panels -->
+  <div class="panels">
+    <div id="panel-accesorios" class="panel" data-panel="accesorios">
+      <div class="grid" id="grid-accesorios"></div>
+    </div>
+
+    <div id="panel-piezas" class="panel" data-panel="piezas" style="display:none">
+      <div class="grid" id="grid-piezas"></div>
+    </div>
+
+    <div id="panel-computadoras" class="panel" data-panel="computadoras" style="display:none">
+      <div class="grid" id="grid-computadoras"></div>
+    </div>
+
+    <div id="panel-servicios-digitales" class="panel" data-panel="servicios-digitales" style="display:none">
+      <div class="grid" id="grid-servicios-digitales"></div>
+    </div>
+
+    <div id="panel-servicios-web" class="panel" data-panel="servicios-web" style="display:none">
+      <div class="grid" id="grid-servicios-web"></div>
+    </div>
+
+    <div id="panel-extras" class="panel" data-panel="extras" style="display:none">
+      <div class="grid" id="grid-extras"></div>
+    </div>
+  </div>
+</section>
+<div class="separator" aria-hidden="true"></div>
+
+<!-- CONTACTO (con matrix también) -->
+<section id="contacto" class="section">
+  <div class="canvas-wrap" aria-hidden="true"><canvas id="matrixContacto"></canvas></div>
+
+  <div class="foreground" style="display:flex;align-items:center;justify-content:center;min-height:50vh;padding-top:20px;">
+    <div class="contact-box" role="contentinfo">
+      <h2>Contacto</h2>
+      <p>📱 WhatsApp: <strong style="color:var(--verde-fuerte)">+52 1 56 3619 3650</strong></p>
+      <p>📷 Instagram: <strong style="color:var(--verde-fuerte)">@predators_cn</strong></p>
+      <p>📍 Comunidad Oriental, Puebla</p>
+      <p style="margin-top:8px;color:var(--muted)">Y bueno… si después de ver todo esto no te animas, ¡te mando un café virtual para que despiertes! ☕
+      😄Para más información sobre nuestros servicios, mándanos mensajito por WhatsApp o búscanos en Instagram. ¡Prometemos no tardarnos como los del banco!</p>
+    </div>
+  </div>
+</section>
+
+<!-- MODAL DETALLES -->
+<div id="serviceModal" class="modal" aria-hidden="true" role="dialog">
+  <div class="modal-content" role="document">
+    <button class="modal-close" aria-label="Cerrar" onclick="closeModal()">✕</button>
+    <div class="modal-grid">
+      <div>
+        <h3 id="modalTitle" style="color:var(--verde-fuerte)"></h3>
+        <p id="modalDesc" style="color:var(--muted)"></p>
+        <ul id="modalSpecs" class="specs-list"></ul>
+
+        <div id="modalColorsWrap" style="margin-top:12px">
+          <div style="font-weight:800;color:var(--muted)">Colores disponibles</div>
+          <div class="colors-row" id="modalColors"></div>
+        </div>
+      </div>
+
+      <aside style="min-width:260px">
+        <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">
+          <div class="emoji-3d" id="modalEmoji"><span>📦</span></div>
+          <div>
+            <div id="modalType" style="font-weight:900"></div>
+            <div class="small" id="modalShortDesc" style="color:var(--muted)"></div>
+          </div>
+        </div>
+
+        <div style="margin:8px 0">
+          <div style="font-size:20px;font-weight:900;color:var(--verde-fuerte)" id="modalPrice"></div>
+          <div id="modalSelectedColorName" style="color:var(--muted);margin-top:6px"></div>
+        </div>
+
+        <button class="tab-btn" style="width:100%;margin-top:10px" onclick="contactWhatsApp()">Contactar por WhatsApp</button>
+        <button class="tab-btn" style="width:100%;margin-top:8px;background:transparent" onclick="closeModal()">Cerrar</button>
+      </aside>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------------- Helpers: render data arrays into grids ---------------- */
+
+/* Data arrays (completos con todo lo que proporcionaste) */
+/* ACCESORIOS: (4 iniciales + 10 nuevos) */
+const accesorios = [
+  { title: "Mouse Gamer ViperX Pro", emoji: "🖱️", price: "$420 MXN", desc: "Mouse gamer con RGB frontal y 7 botones programables.", specs: ["DPI: 200–16,000 ajustables","Botones: 7 programables","Conexión: USB","Peso: 78 g"], colors: [{name:"Negro mate",hex:"#0a0a0a"},{name:"Blanco perla",hex:"#f5f5f5"}], type: "Accesorio" },
+  { title: "Audífonos HyperWave H300", emoji: "🎧", price: "$650 MXN", desc: "Audífonos con sonido virtual 7.1 y micrófono con cancelación.", specs:["Sonido: Surround 7.1 virtual","Micrófono: Flexible con cancelación de ruido","Compatibilidad: PC/PS4/PS5/móvil","Iluminación lateral RGB"], colors:[{name:"Negro",hex:"#080808"},{name:"Azul eléctrico",hex:"#0a7cff"}], type:"Accesorio" },
+  { title: "Mousepad Titan XL RGB", emoji: "🧩", price: "$280 MXN", desc: "Alfombrilla grande con marco RGB y superficie de microfibra.", specs:["Tamaño: 80×30 cm","Iluminación: Marco RGB multicolor","Material: Microfibra antideslizante","Espesor: 4 mm"], colors:[{name:"Negro",hex:"#040404"}], type:"Accesorio" },
+  { title: "Webcam StreamVision 1080p", emoji: "📷", price: "$520 MXN", desc: "Webcam 1080p a 60 FPS con autoenfoque.", specs:["1080p @60FPS","Lente: 110° gran angular","Micrófono: Doble integrado","Funciones: Autoenfoque + corrección de luz"], colors:[{name:"Negro",hex:"#0a0a0a"}], type:"Accesorio" },
+
+  { title:"Teclado Mecánico Storm MK700", emoji:"⌨️", price:"$780 MXN", desc:"Teclado mecánico con switches intercambiables y RGB.", specs:["Switches: Red / Blue","Iluminación: RGB 16M colores","Material: Aluminio + ABS","Conexión: USB-C"], colors:[], type:"Accesorio"},
+  { title:"Mouse UltraLight Pro 18000 DPI", emoji:"🖱️", price:"$690 MXN", desc:"Mouse ultraligero para gaming competitivo.", specs:["DPI: 800–18,000","Peso: 59 g","Botones: 6 programables","Iluminación: RGB"], colors:[], type:"Accesorio"},
+  { title:"Diadema BlackSound Studio", emoji:"🎧", price:"$450 MXN", desc:"Diadema cómoda con micrófono extraíble.", specs:["Sonido: Estéreo HD","Micrófono: Extraíble","Almohadillas: Memory Foam"], colors:[], type:"Accesorio"},
+  { title:"Ring Light Creator 14\"", emoji:"💡", price:"$360 MXN", desc:"Ring light con control Bluetooth y temperatura ajustable.", specs:["Luz: Cálida / neutra / fría","Brillo: Ajustable","Control: Bluetooth"], colors:[], type:"Accesorio"},
+  { title:"Bocinas Mini Bass RGB", emoji:"🔊", price:"$270 MXN", desc:"Bocinas compactas con iluminación frontal RGB.", specs:["Potencia: 10W","Conexión: USB + AUX","Iluminación frontal"], colors:[], type:"Accesorio"},
+  { title:"Cámara 2K StreamCam", emoji:"📷", price:"$720 MXN", desc:"Cámara 1440p ideal para streamers.", specs:["Resolución: 1440p","Micrófono: Estéreo","Ángulo: 90°"], colors:[], type:"Accesorio"},
+  { title:"Hub USB 3.0 QuadPort", emoji:"🔌", price:"$180 MXN", desc:"Hub USB 3.0 de 4 puertos para expansión rápida.", specs:["Puertos: 4","Velocidad: 5 Gbps"], colors:[], type:"Accesorio"},
+  { title:"Soporte Ajustable para Laptop", emoji:"🖥️", price:"$210 MXN", desc:"Soporte en aluminio con 6 niveles de altura.", specs:["Material: Aluminio","Alturas: 6 niveles","Peso máximo: 12 kg"], colors:[], type:"Accesorio"},
+  { title:"Control RGB para Escritorio", emoji:"🎛️", price:"$90 MXN", desc:"Controlador para tiras LED y modos de color.", specs:["Funciones: Encendido, colores, modos","Compatible con tiras LED"], colors:[], type:"Accesorio"},
+  { title:"Micrófono Condensador AirVoice", emoji:"🎙️", price:"$550 MXN", desc:"Micrófono condensador USB con trípode incluido.", specs:["Patrón polar: Cardioide","Incluye: Trípode","Cable: USB"], colors:[], type:"Accesorio"}
+];
+
+/* PIEZAS */
+const piezas = [
+  { title:"GTX 1660 Super 6GB", emoji:"🎮", price:"$3,800 MXN", desc:"GPU para gaming 1080p.", specs:["Memoria: 6GB GDDR6","Ventilación: Dual fan","Consumo: 125W","Recomendado: Juegos 1080p"], colors:[], type:"Pieza" },
+  { title:"SSD NVMe 1TB UltraSpeed", emoji:"💾", price:"$1,150 MXN", desc:"SSD NVMe M.2 de alta velocidad.", specs:["Lectura: 3500 MB/s","Escritura: 3000 MB/s","Formato: M.2","Garantía: 3 años"], colors:[], type:"Pieza" },
+  { title:"Fuente 700W 80+ Bronze", emoji:"🔌", price:"$950 MXN", desc:"Fuente semi-modular con protecciones.", specs:["Certificación: 80+ Bronze","Cableado: Semi-modular","Ventilador: 120 mm silencioso","Protecciones: OVP/OPP/SCP"], colors:[], type:"Pieza" },
+
+  { title:"Procesador Ryzen 7 5700G", emoji:"⚙️", price:"$2,900 MXN", desc:"8 núcleos con gráficos integrados.", specs:["Núcleos: 8","Gráficos integrados"], colors:[], type:"Pieza" },
+  { title:"Tarjeta Madre B450M Pro", emoji:"🧩", price:"$1,300 MXN", desc:"Placa base para CPUs Ryzen.", specs:["Soporte: Ryzen 1–5 gen","RAM: 64GB max"], colors:[], type:"Pieza" },
+  { title:"GPU RTX 4060 8GB", emoji:"🕹️", price:"$6,700 MXN", desc:"GPU moderna con DLSS 3.", specs:["Memoria: GDDR6","DLSS 3"], colors:[], type:"Pieza" },
+  { title:"16GB RAM DDR4 3200MHz", emoji:"🔁", price:"$950 MXN", desc:"Kit 16GB (2x8) DDR4.", specs:["Latencia: CL16","Tipo: Dual channel"], colors:[], type:"Pieza" },
+  { title:"Disco Duro 2TB Seagate", emoji:"🗄️", price:"$800 MXN", desc:"HDD 7200 rpm.", specs:["Velocidad: 7200 rpm","Capacidad: 2TB"], colors:[], type:"Pieza" },
+  { title:"Refrigeración Líquida HydraCool 240", emoji:"❄️", price:"$1,200 MXN", desc:"Refrigeración líquida con RGB.", specs:["Ventiladores: 2 RGB","Compatible: Intel/AMD"], colors:[], type:"Pieza" },
+  { title:"Gabinete Crystal RGB", emoji:"🧱", price:"$950 MXN", desc:"Gabinete con vidrio templado y RGB.", specs:["Ventana: vidrio templado","Ventiladores: 3 incluidos"], colors:[], type:"Pieza" },
+  { title:"Fuente 850W Gold Modular", emoji:"🔋", price:"$1,550 MXN", desc:"Fuente modular 80+ Gold.", specs:["Certificación: 80+ Gold","Compatibilidad: ATX"], colors:[], type:"Pieza" },
+  { title:"Tarjeta WiFi 6 AX3000", emoji:"📶", price:"$520 MXN", desc:"Tarjeta WiFi 6 con antenas dobles.", specs:["Bandas: 2.4/5 GHz","Antenas dobles"], colors:[], type:"Pieza" },
+  { title:"Adaptador M.2 a USB 3.2", emoji:"🔌", price:"$380 MXN", desc:"Adaptador para NVMe a USB.", specs:["Compatibilidad: NVMe","Velocidad: 10 Gbps"], colors:[], type:"Pieza" }
+];
+
+/* COMPUTADORAS */
+const computadoras = [
+  { title:"Starter Box — PC Económica", emoji:"💻", price:"$4,500 MXN", desc:"Ryzen 3 / 8GB / 240GB SSD — ideal para escuela.", specs:["Procesador: Ryzen 3 3200G","RAM: 8GB","Almacenamiento: 240GB SSD","Gráficos: Vega 8"], type:"PC" },
+  { title:"Office Pro — PC Normal", emoji:"🖥️", price:"$7,900 MXN", desc:"Intel i5 / 16GB / 500GB SSD — trabajo y multitarea.", specs:["Procesador: Intel i5 10400","RAM: 16GB","Almacenamiento: 500GB SSD"], type:"PC" },
+  { title:"Beast X — PC Gamer", emoji:"🔥", price:"$15,800 MXN", desc:"Ryzen 5 5600X / RTX 3060 / 1TB SSD — gaming y streaming.", specs:["Procesador: Ryzen 5 5600X","RAM: 16GB 3200MHz","Gráficos: RTX 3060 12GB","Almacenamiento: 1TB SSD"], type:"PC" },
+
+  { title:"PC Escolar Mini", emoji:"🎒", price:"$3,900 MXN", desc:"Ryzen 3 4100, 8GB, 240GB SSD.", specs:["Ryzen 3 4100","8GB RAM","240GB SSD"], type:"PC" },
+  { title:"PC Oficina Plus", emoji:"🏢", price:"$6,500 MXN", desc:"i5 9400, 16GB, 500GB SSD.", specs:["i5 9400","16GB RAM","500GB SSD"], type:"PC" },
+  { title:"PC Multimedia Max", emoji:"🎬", price:"$8,000 MXN", desc:"Ryzen 5 3600, 16GB, 1TB HDD + 480GB SSD.", specs:["Ryzen 5 3600","16GB RAM","1TB HDD + 480GB SSD"], type:"PC" },
+  { title:"PC Creativo Pro", emoji:"🎨", price:"$12,300 MXN", desc:"i7 10700, 32GB, 1TB SSD.", specs:["i7 10700","32GB RAM","1TB SSD"], type:"PC" },
+  { title:"PC Streamer Lite", emoji:"📹", price:"$13,500 MXN", desc:"Ryzen 5 5600G, 16GB, RTX 3050.", specs:["Ryzen 5 5600G","16GB RAM","RTX 3050"], type:"PC" },
+  { title:"PC Gamer Avanzado", emoji:"🏆", price:"$18,500 MXN", desc:"Ryzen 7 5800X, RTX 3060 Ti.", specs:["Ryzen 7 5800X","16GB RAM","RTX 3060 Ti"], type:"PC" },
+  { title:"PC Super Gamer Titan", emoji:"💣", price:"$25,900 MXN", desc:"i7 12700F, 32GB, RTX 4070.", specs:["i7 12700F","32GB RAM","RTX 4070"], type:"PC" },
+  { title:"PC Edición 4K", emoji:"🖼️", price:"$29,800 MXN", desc:"Ryzen 9 5900X, 32GB, RTX 3080.", specs:["Ryzen 9 5900X","32GB RAM","RTX 3080"], type:"PC" },
+  { title:"PC Ultra Compacta MiniBox", emoji:"📦", price:"$2,800 MXN", desc:"Celeron N4020, 8GB, 128GB SSD.", specs:["Celeron N4020","8GB RAM","128GB SSD"], type:"PC" },
+  { title:"PC Profesional Corporativa", emoji:"🏭", price:"$15,200 MXN", desc:"Intel i5 13400, 32GB, 1TB SSD.", specs:["Intel i5 13400","32GB RAM","1TB SSD"], type:"PC" }
+];
+
+/* SERVICIOS DIGITALES */
+const serviciosDigitales = [
+  { title:"Web Pro Start", emoji:"🌐", price:"$800 MXN", desc:"Página responsive hasta 5 secciones, formulario y SEO básico.", specs:["Diseño responsive","Hasta 5 secciones","Formulario","Enlace a WhatsApp","SEO básico","Entrega 4–6 días"], type:"Servicio" },
+  { title:"Mantenimiento Web Mensual", emoji:"🛡️", price:"$250 MXN / mes", desc:"Actualizaciones, backups y optimización.", specs:["Corrección de errores","Copias de seguridad","Actualización de plugins","Optimización de velocidad","Reparación de enlaces"], type:"Servicio" },
+  { title:"Pack Digital — Diseño Gráfico", emoji:"🎨", price:"$300 MXN", desc:"3 logos + banners y publicaciones.", specs:["3 logos","4 banners","6 publicaciones","1 portada FB/YT","Formatos: PNG/JPG/PDF"], type:"Servicio" },
+
+  { title:"Gestión de Redes Sociales", emoji:"📱", price:"$300 MXN", desc:"12 publicaciones + 3 banners", specs:["12 publicaciones","3 banners"], type:"Servicio" },
+  { title:"Edición de Video Básica", emoji:"✂️", price:"$250 MXN", desc:"Video 1–3 min con sonido y textos.", specs:["Duración: 1–3 min","Incluye sonido y textos"], type:"Servicio" },
+  { title:"Edición de Video Pro", emoji:"🎬", price:"$600 MXN", desc:"Video 5–10 min pro con transiciones.", specs:["Duración: 5–10 min","Transiciones + subtítulos"], type:"Servicio" },
+  { title:"Branding Completo", emoji:"🧭", price:"$450 MXN", desc:"Logo, paleta y tipografías.", specs:["Logo","Paleta de color","Tipografías"], type:"Servicio" },
+  { title:"Pack de Portadas para Redes", emoji:"📁", price:"$180 MXN", desc:"6 diseños para redes.", specs:["6 diseños"], type:"Servicio" },
+  { title:"Diseño de Flyers Publicitarios", emoji:"📣", price:"$150 MXN", desc:"3 modelos de flyers.", specs:["3 modelos"], type:"Servicio" },
+  { title:"Optimización de Marca (Rebranding)", emoji:"🔁", price:"$380 MXN", desc:"Revisión y propuestas de mejora.", specs:["Revisión","Propuestas de mejora"], type:"Servicio" },
+  { title:"Creación de Menú Digital", emoji:"📋", price:"$200 MXN", desc:"PDF + imagen interactiva.", specs:["PDF + imagen interactiva"], type:"Servicio" },
+  { title:"Diseño de Tarjetas Digitales", emoji:"💳", price:"$120 MXN", desc:"Tarjetas digitales vertical/horizontal.", specs:["Formato vertical u horizontal"], type:"Servicio" },
+  { title:"Digitalización de Documentos", emoji:"📑", price:"$100 MXN", desc:"Escaneo y entrega en PDF.", specs:["Escaneo","Formato PDF"], type:"Servicio" }
+];
+
+/* SERVICIOS WEB */
+const serviciosWeb = [
+  { title:"Página Web con Sistema de Citas", emoji:"📆", price:"$950 MXN", desc:"Agenda online + correos automáticos.", specs:["Agenda online","Correos automáticos"], type:"Web" },
+  { title:"Web para Restaurantes con Menú Digital", emoji:"🍽️", price:"$1,200 MXN", desc:"Menú + ubicación + pedidos por WhatsApp.", specs:["Menú digital","Integración WhatsApp","Ubicación"], type:"Web" },
+  { title:"Página para Negocio Personal", emoji:"🧾", price:"$500 MXN", desc:"Inicio + servicios + contacto.", specs:["Inicio","Servicios","Contacto"], type:"Web" },
+  { title:"Sistema de Blog Profesional", emoji:"✍️", price:"$700 MXN", desc:"Panel para publicar.", specs:["Panel de administración"], type:"Web" },
+  { title:"Página para Portafolio Profesional", emoji:"🖼️", price:"$650 MXN", desc:"Portafolio para fotógrafos y artistas.", specs:["Galería","Contacto"], type:"Web" },
+  { title:"Integración de Dominio + Hosting", emoji:"🌐", price:"$250 MXN", desc:"Configuración de dominio y hosting.", specs:["Dominio","Hosting","Configuración completa"], type:"Web" },
+  { title:"Correos Corporativos", emoji:"📧", price:"$200 MXN c/u", desc:"Creación y configuración de correos.", specs:["Creación de cuentas","Configuración"], type:"Web" },
+  { title:"ChatBot Automático para Web", emoji:"🤖", price:"$350 MXN", desc:"Chat bot con respuestas básicas.", specs:["Respuestas automatizadas"], type:"Web" },
+  { title:"Sistema de Reservación para Hoteles", emoji:"🏨", price:"$1,800 MXN", desc:"Calendario y pagos integrados.", specs:["Calendario","Pagos"], type:"Web" },
+  { title:"Página Web para Cursos", emoji:"🎓", price:"$1,500 MXN", desc:"Sistema de clases + registro.", specs:["Sistema de cursos","Registro de alumnos"], type:"Web" }
+];
+
+/* EXTRAS */
+const extras = [
+  { title:"Ensamblado de PC", emoji:"🧰", price:"$350 MXN", desc:"Armado y pruebas de rendimiento.", specs:["Armado completo","Gestión de cables","Pruebas de rendimiento"], type:"Extra" },
+  { title:"Limpieza Profunda + Pasta", emoji:"🧼", price:"$220 MXN", desc:"Limpieza interna y cambio de pasta térmica.", specs:["Limpieza interna","Cambio de pasta térmica","Optimización"], type:"Extra" },
+  { title:"Instalación Windows", emoji:"🪟", price:"$150 MXN", desc:"Instalación completa con drivers.", specs:["Instalación Windows","Drivers incluidos"], type:"Extra" },
+  { title:"Respaldo de información (hasta 200GB)", emoji:"💽", price:"$120 MXN", desc:"Copia de seguridad hasta 200GB.", specs:["Respaldo hasta 200GB"], type:"Extra" },
+  { title:"Limpieza externa premium", emoji:"✨", price:"$100 MXN", desc:"Pulido y desinfección externa.", specs:["Pulido","Desinfección"], type:"Extra" },
+  { title:"Instalación de antivirus", emoji:"🛡️", price:"$80 MXN", desc:"Instalación y configuración básica.", specs:["Instalación antivirus","Configuración"], type:"Extra" },
+  { title:"Recuperación de archivos", emoji:"🧩", price:"$250 MXN", desc:"Recuperación de archivos borrados.", specs:["Recuperación de archivos eliminados"], type:"Extra" },
+  { title:"Optimización extrema para gaming", emoji:"⚡", price:"$200 MXN", desc:"Mejoras de FPS y optimización software.", specs:["Mejoras FPS","Limpieza software"], type:"Extra" },
+  { title:"Instalación de programas básicos", emoji:"📦", price:"$100 MXN", desc:"Office, Chrome, PDF y más.", specs:["Office","Chrome","PDF"], type:"Extra" },
+  { title:"Configuración de impresoras", emoji:"🖨️", price:"$90 MXN", desc:"Instalación y configuración de impresoras.", specs:["Instalación","Configuración"], type:"Extra" },
+  { title:"Formateo completo", emoji:"🧹", price:"$180 MXN", desc:"Formateo con respaldo incluido.", specs:["Formateo","Respaldo incluido"], type:"Extra" },
+  { title:"Revisión diagnóstica general", emoji:"🔎", price:"$70 MXN", desc:"Diagnóstico integral del equipo.", specs:["Revisión completa","Reporte"], type:"Extra" }
+];
+
+/* Utility: render a card */
+function createCard(item){
+  const div = document.createElement('div');
+  div.className = 'card floaty';
+  div.dataset.title = item.title;
+  div.dataset.price = item.price;
+  div.dataset.desc = item.desc || '';
+  div.dataset.specs = JSON.stringify(item.specs || []);
+  div.dataset.colors = JSON.stringify(item.colors || []);
+  div.dataset.type = item.type || '';
+
+  div.innerHTML = `
+    <div class="emoji-3d"><span>${item.emoji || '📦'}</span></div>
+    <div>
+      <h4>${item.title}</h4>
+      <p class="desc">${item.desc || ''}</p>
+    </div>
+    <div>
+      <p class="price">${item.price || ''}</p>
+    </div>
+  `;
+  div.addEventListener('click', ()=> openModalFromData(div));
+  div.tabIndex = 0;
+  div.addEventListener('keydown', e=>{ if(e.key==='Enter' || e.key===' ') { e.preventDefault(); openModalFromData(div); } });
+
+  return div;
+}
+
+/* render lists into DOM */
+function renderGrid(arr, containerId){
+  const cont = document.getElementById(containerId);
+  cont.innerHTML = '';
+  arr.forEach(item=>{
+    const card = createCard(item);
+    cont.appendChild(card);
+  });
+}
+
+/* initial render */
+renderGrid(accesorios, 'grid-accesorios');
+renderGrid(piezas, 'grid-piezas');
+renderGrid(computadoras, 'grid-computadoras');
+renderGrid(serviciosDigitales, 'grid-servicios-digitales');
+renderGrid(serviciosWeb, 'grid-servicios-web');
+renderGrid(extras, 'grid-extras');
+
+/* ---- tabs behavior ---- */
+(function(){
+  const tabBtns = document.querySelectorAll('.tab-btn');
+  const panels = {
+    'accesorios': document.getElementById('panel-accesorios'),
+    'piezas': document.getElementById('panel-piezas'),
+    'computadoras': document.getElementById('panel-computadoras'),
+    'servicios-digitales': document.getElementById('panel-servicios-digitales'),
+    'servicios-web': document.getElementById('panel-servicios-web'),
+    'extras': document.getElementById('panel-extras')
+  };
+  function showTab(name){
+    tabBtns.forEach(b => {
+      const is = b.dataset.tab === name;
+      b.classList.toggle('active', is);
+      b.setAttribute('aria-selected', is ? 'true' : 'false');
+    });
+    Object.keys(panels).forEach(k=>{
+      const p = panels[k];
+      if(k===name){ p.style.display=''; p.setAttribute('aria-hidden','false'); p.scrollIntoView({behavior:'smooth'}); }
+      else { p.style.display='none'; p.setAttribute('aria-hidden','true'); }
+    });
+  }
+  tabBtns.forEach(b=> b.addEventListener('click', ()=> showTab(b.dataset.tab)));
+  // initial
+  showTab('accesorios');
+})();
+
+/* ---------------- MODAL: abrir contenido ---------------- */
+const modal = document.getElementById('serviceModal');
+function openModalFromData(el){
+  const title = el.dataset.title || 'Artículo';
+  const price = el.dataset.price || '';
+  const desc = el.dataset.desc || '';
+  const specs = JSON.parse(el.dataset.specs || '[]');
+  const colors = JSON.parse(el.dataset.colors || '[]');
+  const type = el.dataset.type || '';
+
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalDesc').textContent = desc;
+  const specsEl = document.getElementById('modalSpecs');
+  specsEl.innerHTML = '';
+  if(specs.length){
+    specs.forEach(s => { const li=document.createElement('li'); li.textContent = s; specsEl.appendChild(li); });
+  } else {
+    const li=document.createElement('li'); li.textContent='Especificaciones no disponibles'; specsEl.appendChild(li);
+  }
+
+  // colors
+  const colorsRow = document.getElementById('modalColors');
+  colorsRow.innerHTML = '';
+  if(colors && colors.length){
+    for(const c of colors){
+      const sw = document.createElement('div');
+      sw.className = 'color-swatch';
+      sw.style.background = c.hex || c;
+      sw.title = c.name || c;
+      sw.addEventListener('click', ()=>{
+        colorsRow.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('selected'));
+        sw.classList.add('selected');
+        document.getElementById('modalSelectedColorName').textContent = 'Seleccionado: ' + (c.name || c);
+      });
+      colorsRow.appendChild(sw);
+    }
+    const first = colorsRow.querySelector('.color-swatch');
+    if(first){ first.classList.add('selected'); document.getElementById('modalSelectedColorName').textContent = 'Seleccionado: ' + (colors[0].name || ''); }
+  } else {
+    colorsRow.innerHTML = '<div style="color:var(--muted)">No hay opciones de color</div>';
+    document.getElementById('modalSelectedColorName').textContent = '';
+  }
+
+  document.getElementById('modalType').textContent = type.toUpperCase();
+  document.getElementById('modalShortDesc').textContent = desc;
+  document.getElementById('modalPrice').textContent = price;
+
+  const emojiSpan = el.querySelector('.emoji-3d span');
+  if(emojiSpan) document.getElementById('modalEmoji').innerHTML = '<span>' + emojiSpan.innerText + '</span>';
+
+  modal.classList.add('active'); modal.setAttribute('aria-hidden','false');
+  setTimeout(()=> document.querySelector('.modal-close')?.focus(),120);
+}
+function closeModal(){
+  modal.classList.remove('active'); modal.setAttribute('aria-hidden','true');
+}
+window.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
+modal.addEventListener('click', e=>{ if(e.target===modal) closeModal(); });
+
+/* contact button in modal */
+function contactWhatsApp(){
+  const title = document.getElementById('modalTitle').textContent || '';
+  const price = document.getElementById('modalPrice').textContent || '';
+  const color = document.getElementById('modalSelectedColorName').textContent || '';
+  const txt = encodeURIComponent(`Hola, me interesa: ${title}. ${color} Precio: ${price}. ¿Está disponible?`);
+  const wa = 'https://wa.me/5215636193650?text=' + txt;
+  window.open(wa, '_blank');
+}
+
+/* scroll helper */
+function scrollToSection(id){
+  const el = document.getElementById(id);
+  if(el) el.scrollIntoView({behavior:'smooth'});
+}
+
+/* ---------------- MATRIX EFFECT (only two canvases) ---------------- */
+(function(){
+  function startMatrix(canvasId, options={}){
+    const canvas = document.getElementById(canvasId);
+    if(!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let fontSize = options.fontSize || 14;
+    let columns = 0;
+    let drops = [];
+    const letters = ['0','1'];
+
+    function resize(){
+      canvas.width = canvas.clientWidth || window.innerWidth;
+      canvas.height = canvas.clientHeight || window.innerHeight;
+      fontSize = Math.max(10, Math.floor(window.innerWidth < 420 ? 10 : (options.fontSize||14)));
+      columns = Math.floor(canvas.width / fontSize);
+      drops = new Array(columns).fill(1);
+      ctx.font = fontSize + 'px monospace';
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    const color = options.color || getComputedStyle(document.documentElement).getPropertyValue('--verde-fuerte') || '#00ff66';
+
+    function draw(){
+      ctx.fillStyle = 'rgba(0,0,0,0.06)';
+      ctx.fillRect(0,0,canvas.width,canvas.height);
+      ctx.font = fontSize + 'px monospace';
+      for(let i=0;i<columns;i++){
+        const ch = letters[(i + Math.floor(drops[i])) % 2];
+        ctx.fillStyle = color;
+        ctx.globalAlpha = 0.95 - Math.min(0.5, drops[i]*0.001);
+        ctx.fillText(ch, i*fontSize, drops[i]*fontSize);
+        if(drops[i]*fontSize > canvas.height && Math.random() > 0.98) drops[i]=0;
+        drops[i]++;
+      }
+      ctx.globalAlpha = 1;
+    }
+    setInterval(draw, options.interval || 80);
+  }
+
+  startMatrix('matrixInicio',{fontSize:14,interval:80,color:getComputedStyle(document.documentElement).getPropertyValue('--verde-fuerte')});
+  startMatrix('matrixContacto',{fontSize:12,interval:85,color:getComputedStyle(document.documentElement).getPropertyValue('--verde-bajo')});
+})();
+
+/* Ensure hero title is above canvas */
+document.getElementById('heroTitle').style.zIndex = 3;
+</script>
+</body>
+</html>
